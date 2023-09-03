@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+
+<head>
+    <script src="https://code.highcharts.com/10/highcharts.js"></script>
+    <head>
+        <style>
+            .buttons {
+                min-width: 310px;
+                text-align: center;
+                margin: 1rem 0;
+                font-size: 0;
+                padding-top: 20px;
+            }
+
+            .buttons button {
+                cursor: pointer;
+                border: 1px solid silver;
+                border-right-width: 0;
+                background-color: #f8f8f8;
+                font-size: 1rem;
+                padding: 0.5rem;
+                transition-duration: 0.3s;
+                margin: 0;
+            }
+
+            .buttons button.active {
+                background-color: #0051b4;
+                color: white;
+            }
+
+            .buttons button:first-child {
+                border-top-left-radius: 0.3em;
+                border-bottom-left-radius: 0.3em;
+            }
+        </style>
+    </head>
+</head>
+
+<body>
+    <script>
+
+    </script>
+
+    <div class='buttons'>
+        <button id='all-regions' class="active" onclick="updateChart('')">
+            All Regions
+        </button>
+        <button id='ECA' onclick="updateChart('ECA')">
+            ECA Region
+        </button>
+        <button id='EU' onclick="updateChart('EU')">
+            EU Region
+        </button>
+    </div>
+    <div id="container" style="width:100%; height:400px;">
+    </div>
+    <script type="text/javascript">
+        // const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/1BUOzNU0sv5CPWz75oux8S7l7UOcJBQzcfxDCPXs_cCs/pub?gid=0&single=true&output=csv'; // Replace with your Google Sheet URL
+        const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRa0aUEhPBQVe8h4wXb5RYhFVVmh8jv0U_6S902cROkrU8I9TuiSxRdxsi1_zTbBMXs4wKZnj4mIPt4/pub?output=csv'; // Replace with your Google Sheet URL
+
+        let records = [];
+        let chart;
+        fetch(googleSheetUrl)
+            .then(response => response.text())
+            .then(data => {
+                // Process the CSV data
+                data = data.replace(/, Mbps/g, " Mbps");
+                const rows = data.split('\n');
+                const header = rows[0].split(',').map(x => x.trim());
+
+                const result = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const values = rows[i].split(',');
+                    const rowData = {};
+                    for (let j = 0; j < header.length; j++) {
+                        let value = values[j];
+
+                        // Handle single quotes within double-quoted fields
+                        if (value.indexOf('"') != -1) {
+                            value = value.replace(/"/g, "");
+                        }
+
+                        rowData[header[j]] = value;
+
+                    }
+                    result.push(rowData);
+                }
+
+                records = result.map(row => {
+                    return {
+                        name: row.country,
+                        value: parseFloat(row.value),
+                        average: parseFloat(row.average),
+                        region: row.region
+                    }
+                });
+                records.sort((a, b) => a.value - b.value);
+                drawChart(records);
+            })
+            .catch(error => {
+                console.error('Error reading data from Google Sheet:', error);
+            });
+
+        function updateChart(filter) {
+            const buttons = document.querySelectorAll('.buttons button');
+            buttons.forEach(button => {
+                button.classList.remove('active');
+            });
+            // Add the 'active' class to the clicked button
+            const clickedButton = document.getElementById(filter);
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+            if (filter == '') {
+                const newData = records;
+                const series = newData.map(x => x.value);
+                chart.series[0].setData(series);
+                const newspline = newData.map(x => x.average);
+                chart.series[1].setData(newspline);
+
+                chart.series[1].update({
+                    name: "All Regions"
+                })
+                const clickedButton = document.getElementById('all-regions');
+                if (clickedButton) {
+                    clickedButton.classList.add('active');
+                }
+                chart.redraw();
+                return;
+            }
+            const newData = records.filter(x => x.region == filter);
+            const series = newData.map(x => x.value);
+            chart.series[0].setData(series);
+            const newspline = newData.map(x => x.average);
+            chart.series[1].setData(newspline);
+
+            const title = filter == 'ECA' ? "ECA Regions" : "EU Regions";
+            chart.series[1].update({
+                name: title
+            })
+
+            // Redraw the chart with the updated data
+            chart.redraw();
+
+        }
+        function drawChart(data) {
+            const categories = data.map(x => x.name);
+            const series = data.map(x => x.value);
+            const spline = data.map(x => x.average);
+            chart = Highcharts.chart('container', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Country Scores'
+                },
+                xAxis: {
+                    title: {
+                        text: 'Countries'
+                    },
+                    categories: categories
+                },
+                yAxis: {
+                    title: {
+                        text: 'Score'
+                    },
+                    min: 0,
+                    max: 125
+                },
+                credits: {
+                    enabled: false
+                },
+                plotOptions: {
+                    column: {
+                        dataLabels: {
+                            enabled: true,
+                            format: '{y}'
+                        },
+                        colorByPoint: true
+                    }
+                },
+                series: [
+                    {
+                        name: 'Score',
+                        data: series,
+                    },
+                    {
+                        name: 'All Regions',
+                        type: 'spline',
+                        color: 'red',
+                        data: spline,
+                        marker: {
+                            enabled: false
+                        }
+                    }
+                ]
+            });
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const defaultColor = 'blue';
+            const specialColors = {
+                'Country 6': 'green',
+                'Country 8': 'green',
+                'Country 11': 'green',
+                'Country 10': 'green'
+            };
+
+            const dataColors = countries.map(country => specialColors[country] || defaultColor);
+
+            const sortedIndices = scores.map((score, index) => index)
+                .sort((a, b) => scores[a] - scores[b]);
+
+
+
+        });
+    </script>
+</body>
+
+</html>
