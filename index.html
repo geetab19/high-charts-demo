@@ -118,7 +118,7 @@
             }
             if (filter == '') {
                 const newData = records;
-                const series = newData.map(x => {return {value:x.value,color: x.color}} );
+                const series = newData.map(x => {return {y:x.value,color: x.color}} );
                 chart.series[0].setData(series);
                 const newspline = newData.map(x => x.average);
                 chart.series[1].setData(newspline);
@@ -134,7 +134,7 @@
                 return;
             }
             const newData = records.filter(x => x.region == filter);
-            const series = newData.map(x => x.value);
+            const series = newData.map(x => { return {y:x.value,color: x.color}});
             chart.series[0].setData(series);
             const newspline = newData.map(x => x.average);
             chart.series[1].setData(newspline);
@@ -150,7 +150,7 @@
         }
         function drawChart(data) {
             const categories = data.map(x => x.name);
-            const series = data.map(x => x.value);
+            const series = data.map(x => {return {y:x.value,color: x.color}});
             const spline = data.map(x => x.average);
             chart = Highcharts.chart('container', {
                 chart: {
@@ -178,7 +178,7 @@
                 plotOptions: {
                     column: {
                         dataLabels: {
-                            enabled: true,
+                            enabled: false,
                             format: '{y}'
                         },
                         colorByPoint: true
