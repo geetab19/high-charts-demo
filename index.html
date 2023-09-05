@@ -14,13 +14,13 @@
 
             .buttons button {
                 cursor: pointer;
-                border: 1px solid silver;
+                border: 1px solid #0051b4;
                 border-right-width: 0;
-                background-color: #f8f8f8;
                 font-size: 1rem;
                 padding: 0.5rem;
                 transition-duration: 0.3s;
                 margin: 0;
+                border-radius: 0;
             }
 
             .buttons button.active {
@@ -59,6 +59,10 @@
         const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRa0aUEhPBQVe8h4wXb5RYhFVVmh8jv0U_6S902cROkrU8I9TuiSxRdxsi1_zTbBMXs4wKZnj4mIPt4/pub?output=csv'; // Replace with your Google Sheet URL
 
         let records = [];
+        const  colors = {
+            ECA: "blue",
+            EU: "green"
+        }
         let chart;
         fetch(googleSheetUrl)
             .then(response => response.text())
@@ -91,7 +95,8 @@
                         name: row.country,
                         value: parseFloat(row.value),
                         average: parseFloat(row.average),
-                        region: row.region
+                        region: row.region,
+                        color: colors[row.region]
                     }
                 });
                 records.sort((a, b) => a.value - b.value);
@@ -113,7 +118,7 @@
             }
             if (filter == '') {
                 const newData = records;
-                const series = newData.map(x => x.value);
+                const series = newData.map(x => {return {value:x.value,color: x.color}} );
                 chart.series[0].setData(series);
                 const newspline = newData.map(x => x.average);
                 chart.series[1].setData(newspline);
@@ -207,10 +212,10 @@
                 'Country 10': 'green'
             };
 
-            const dataColors = countries.map(country => specialColors[country] || defaultColor);
+            // const dataColors = countries.map(country => specialColors[country] || defaultColor);
 
-            const sortedIndices = scores.map((score, index) => index)
-                .sort((a, b) => scores[a] - scores[b]);
+            // const sortedIndices = scores.map((score, index) => index)
+            //     .sort((a, b) => scores[a] - scores[b]);
 
 
 
