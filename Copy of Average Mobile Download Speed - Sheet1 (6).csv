@@ -1,0 +1,34 @@
+var_id,country,value,year,region,average,lat,long
+"Average mobile download speed, Mbps",Albania,42.86,2022,ECA,55,41.000028,19.9999619
+"Average mobile download speed, Mbps",Austria,55.63,2022,EU,55,47.59397,14.12456
+"Average mobile download speed, Mbps",Belgium,53.52,2022,EU,55,50.6402809,4.6667145
+"Average mobile download speed, Mbps",Bosnia & Herzegovina,27.49,2022,EU,55,44.3053476,17.5961467
+"Average mobile download speed, Mbps",Bulgaria,94.32,2022,EU,55,42.6073975,25.4856617
+"Average mobile download speed, Mbps",Croatia,80.17,2022,EU,55,45.3658443,15.6575209
+"Average mobile download speed, Mbps",Cyprus,69.99,2022,EU,55,34.9823018,33.1451285
+"Average mobile download speed, Mbps",Czechia,43.28,2022,EU,55,49.7439047,15.3381061
+"Average mobile download speed, Mbps",Denmark,94.17,2022,EU,55,55.670249,10.3333283
+"Average mobile download speed, Mbps",Estonia,52.82,2022,EU,55,58.7523778,25.3319078
+"Average mobile download speed, Mbps",Finland,65.68,2022,EU,55,63.2467777,25.9209164
+"Average mobile download speed, Mbps",France,56.77,2022,EU,55,46.603354,1.8883335
+"Average mobile download speed, Mbps",Germany,52.18,2022,EU,55,51.1638175,10.4478313
+"Average mobile download speed, Mbps",Greece,59.25,2022,EU,55,38.9953683,21.9877132
+"Average mobile download speed, Mbps",Hungary,40.16,2022,EU,55,47.1817585,19.5060937
+"Average mobile download speed, Mbps",Ireland,26.01,2022,EU,55,52.865196,-7.9794599
+"Average mobile download speed, Mbps",Italy,36.45,2022,EU,55,42.6384261,12.674297
+"Average mobile download speed, Mbps",Kosovo,28.48,2022,ECA,55,42.5869578,20.9021231
+"Average mobile download speed, Mbps",Latvia,33.37,2022,EU,55,56.8406494,24.7537645
+"Average mobile download speed, Mbps",Lithuania,46.13,2022,EU,55,55.3500003,23.7499997
+"Average mobile download speed, Mbps",Luxembourg,74.93,2022,EU,55,49.8158683,6.1296751
+"Average mobile download speed, Mbps",Malta,47.68,2022,EU,55,35.8885993,14.4476911
+"Average mobile download speed, Mbps",Montenegro,39.26,2022,ECA,55,42.9868853,19.5180992
+"Average mobile download speed, Mbps",Netherlands,107.81,2022,EU,55,52.2434979,5.6343227
+"Average mobile download speed, Mbps",North Macedonia,64.22,2022,ECA,55,41.6171214,21.7168387
+"Average mobile download speed, Mbps",Poland,36.61,2022,EU,55,52.215933,19.134422
+"Average mobile download speed, Mbps",Portugal,46.97,2022,EU,55,39.6621648,-8.1353519
+"Average mobile download speed, Mbps",Romania,34.12,2022,EU,55,45.9852129,24.6859225
+"Average mobile download speed, Mbps",Serbia,43.37,2022,ECA,55,44.1534121,20.55144
+"Average mobile download speed, Mbps",Slovakia,31.91,2022,EU,55,48.7411522,19.4528646
+"Average mobile download speed, Mbps",Slovenia,53.13,2022,EU,55,46.1199444,14.8153333
+"Average mobile download speed, Mbps",Spain,36.07,2022,EU,55,39.3260685,-4.8379791
+"Average mobile download speed, Mbps",Sweden,63.99,2022,EU,55,59.6749712,14.5208584
