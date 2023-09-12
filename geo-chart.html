@@ -101,7 +101,7 @@
                     }
                 });
                 records.sort((a, b) => a.value - b.value);
-                drawChart(records);
+                drawGeoChart(records);
             })
             .catch(error => {
                 console.error('Error reading data from Google Sheet:', error);
@@ -157,51 +157,13 @@
             const spline = data.map(x => x.average);
             chart = Highcharts.chart('container', {
                 chart: {
-                    type: 'column'
+                    map: 'custom/europe'
                 },
                 title: {
                     text: 'Country Scores'
-                },
-                xAxis: {
-                    title: {
-                        text: 'Countries'
-                    },
-                    categories: categories
-                },
-                yAxis: {
-                    title: {
-                        text: 'Score'
-                    },
-                    min: 0,
-                    max: 125
-                },
-                credits: {
-                    enabled: false
-                },
-                plotOptions: {
-                    column: {
-                        dataLabels: {
-                            enabled: false,
-                            format: '{y}'
-                        },
-                        colorByPoint: true
-                    }
-                },
+                },               
                 series: [
-                    {
-                        name: 'Score',
-                        data: series,
-                        showInLegend: false
-                    },
-                    {
-                        name: 'All Regions',
-                        type: 'spline',
-                        color: 'red',
-                        data: spline,
-                        marker: {
-                            enabled: false
-                        }
-                    }
+                   
                 ]
             });
         }     
