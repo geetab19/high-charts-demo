@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 
 <head>
-    <script src="https://code.highcharts.com/10/highcharts.js"></script>
-
+    <script src="https://code.highcharts.com/maps/highmaps.js"></script>
+<script src="https://code.highcharts.com/modules/geoheatmap.js"></script>
+<script src="https://code.highcharts.com/maps/modules/data.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>    
+    
     <head>
         <style>
             .buttons {
@@ -33,6 +37,15 @@
                 border-top-left-radius: 0.3em;
                 border-bottom-left-radius: 0.3em;
             }
+            .highcharts-figure {
+                min-width: 300px;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+
+            #container {
+                height: 600px;
+            }
         </style>
     </head>
 </head>
@@ -53,8 +66,8 @@
             EU Region
         </button>
     </div>
-    <div id="container" style="width:100%; height:400px;">
-    </div>
+    <div id="container"></div>
+    
     <script type="text/javascript">
         // const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/1BUOzNU0sv5CPWz75oux8S7l7UOcJBQzcfxDCPXs_cCs/pub?gid=0&single=true&output=csv'; // Replace with your Google Sheet URL
         const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRa0aUEhPBQVe8h4wXb5RYhFVVmh8jv0U_6S902cROkrU8I9TuiSxRdxsi1_zTbBMXs4wKZnj4mIPt4/pub?output=csv'; // Replace with your Google Sheet URL
@@ -97,77 +110,107 @@
                         value: parseFloat(row.value),
                         average: parseFloat(row.average),
                         region: row.region,
-                        color: colors[row.region]
+                        color: colors[row.region],
+                        lat: parseFloat(row.lat),
+                        lon: parseFloat(row.long)
                     }
                 });
                 records.sort((a, b) => a.value - b.value);
-                drawGeoChart(records);
+                // drawChart(records);
+               // drawWorldChart(records);
+                drawEUChart(records);
             })
             .catch(error => {
                 console.error('Error reading data from Google Sheet:', error);
-            });
+        });
 
-        function updateChart(filter) {
-            const buttons = document.querySelectorAll('.buttons button');
-            buttons.forEach(button => {
-                button.classList.remove('active');
-            });
-            // Add the 'active' class to the clicked button
-            const clickedButton = document.getElementById(filter);
-            if (clickedButton) {
-                clickedButton.classList.add('active');
-            }
-            if (filter == '') {
-                const newData = records;
-                const series = newData.map(x => { return { y: x.value, color: x.color } });
-                chart.series[0].setData(series);
-                const newspline = newData.map(x => x.average);
-                chart.series[1].setData(newspline);
+function drawEUChart(inputData){
+    const inSeries = inputData.map(x => { return { y: x.value, color: x.color } });
+    const inData = inputData.map(x =>{ return { lon :x.lon, lat : x.lat,value: x.value} });
+    (async () => {
+            const world = await fetch(
+    'https://code.highcharts.com/mapdata/custom/world.topo.json'
+    ).then(response => response.json());
 
-                chart.series[1].update({
-                    name: "All Regions"
-                })
-                const clickedButton = document.getElementById('all-regions');
-                if (clickedButton) {
-                    clickedButton.classList.add('active');
-                }
-                chart.redraw();
-                return;
-            }
-            const newData = records.filter(x => x.region == filter);
-            const series = newData.map(x => { return { y: x.value, color: x.color } });
-            const newCategories = newData.map(x => x.name);
-            // Update the categories and redraw the chart
-            chart.xAxis[0].update({
-                categories: newCategories
-            });
-            chart.series[0].setData(series);
-            const newspline = newData.map(x => x.average);
-            chart.series[1].setData(newspline);
+    const eu = await fetch(
+        'https://code.highcharts.com/mapdata/custom/european-union.topo.json'
+    ).then(response => response.json());
 
-            const title = filter == 'ECA' ? "ECA Regions" : "EU Regions";
-            chart.series[1].update({
-                name: title
-            })
+// Brexit
+eu.objects.default.geometries.splice(
+    eu.objects.default.geometries.findIndex(g => g.id === 'GB'),
+    1
+);
 
+
+// Initialize the chart
+Highcharts.mapChart('container', {
+
+    chart: {
+        map: eu
+    },
+
+    title: {
+        text: 'European Union'
+    },
+
+    subtitle: {
+        text: ''
+    },
+
+    mapNavigation: {
+        enabled: true,
+        buttonOptions: {
+            verticalAlign: 'bottom'
         }
-        function drawChart(data) {
-            const categories = data.map(x => x.name);
-            const series = data.map(x => { return { y: x.value, color: x.color } });
-            const spline = data.map(x => x.average);
-            chart = Highcharts.chart('container', {
-                chart: {
-                    map: 'custom/europe'
-                },
-                title: {
-                    text: 'Country Scores'
-                },               
-                series: [
-                   
-                ]
-            });
-        }     
-    </script>
+    },
+
+    plotOptions: {
+        map: {
+            showInLegend: false
+        }
+    },
+
+    colorAxis: {
+        min: 0,
+            max: 100,
+           
+
+    },
+
+    series: [{
+        // World map
+        data: [],
+        affectsMapView: false,
+        mapData: world,
+        borderColor: 'rgba(0, 0, 0, 0)',
+        nullColor: 'rgba(196, 196, 196, 0.2)'
+    }, {
+        // EU map
+        //data,
+        type: 'geoheatmap',
+        //name:'Average Mobile Download Speed',   
+        colsize: 1,
+        rowsize: 1,
+        data :inData,
+        joinBy: null,
+        borderColor: '#666'
+    }, {
+        // EU map
+        //data,
+        //type: 'geoheatmap',
+        name:'Average Mobile Download Speed',   
+        
+        data :inSeries,
+        joinBy: null,
+        borderColor: '#666'
+    }]
+   });
+ })();
+
+}
+        
+   </script>
 </body>
 
 </html>
