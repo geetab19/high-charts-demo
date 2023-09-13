@@ -82,15 +82,15 @@
                     const rowData = {};
                     for (let j = 0; j < header.length; j++) {
                         let value = values[j];
-                        console.log("value=" + value)
+                       // console.log("value=" + value)
                         if (value.indexOf('"') != -1) {
                             value = value.replace(/"/g, "");
                         }
                         rowData[header[j]] = value;
                     }
                     result.push(rowData);
-                    console.log("rowData====>");
-                    console.dir(rowData);
+                   // console.log("rowData====>");
+                    //console.dir(rowData);
                 }
 
                 records = result.map(row => {
@@ -104,8 +104,8 @@
                         lon: parseFloat(row.long)
                     }
                 });
-                console.log("records=");
-                console.dir(records);
+                //console.log("records=");
+                //console.dir(records);
                 drawEUChart(records);
             })
             .catch(error => {
@@ -114,7 +114,7 @@
 
         function mapValueToOpacity(value) {
             // Map the value range to opacity range (adjust min and max values as needed)
-            console.log("value====>" + value);
+           // console.log("value====>" + value);
             const minValue = 0;
             const maxValue = 120;
             const minOpacity = 0.5;
@@ -129,6 +129,7 @@
         function drawEUChart(inputData) {
             const inSeries = inputData.map(x => {
                 return { name: x.name, lat: x.lat, lon: x.lon, value: x.value }
+               //return {  value: x.value }
             });
             console.dir(inSeries);
             (async () => {
@@ -161,20 +162,20 @@
                             verticalAlign: 'bottom'
                         }
                     },
-                    plotOptions: {
-                        map: {
-                            showInLegend: false,
-                            dataLabels: {
-                                enabled: true,
-                                format: '{point.lat}, {point.lon}', // Format for displaying lat and lon
-                                style: {
-                                    color: 'black', // Color of the data labels
-                                    textOutline: '0px contrast', // Remove text outline
-                                },
-                            },
+                    // plotOptions: {
+                    //     map: {
+                    //         showInLegend: false,
+                    //         dataLabels: {
+                    //             enabled: true,
+                    //             format: '{point.lat}, {point.lon}', // Format for displaying lat and lon
+                    //             style: {
+                    //                 color: 'black', // Color of the data labels
+                    //                 textOutline: '0px contrast', // Remove text outline
+                    //             },
+                    //         },
 
-                        }
-                    },
+                    //     }
+                    // },
                     colorAxis: {
                         min: 0,
                         max: 120,
@@ -183,33 +184,37 @@
                             [0.5, 'rgba(0, 0, 255, 0.6)'],
                             [1, 'rgba(0, 0, 255, 1.0)']
                         ],
-                        labels: {
-                            format: '{value}'
-                        }
+                       
                     },
                     series: [
+                        {
+                            name: 'Basemap',
+                            mapData: eu,
+                            accessibility: {
+                                exposeAsGroupOnly: true
+                            },
+                            borderColor: '#606060',
+                            nullColor: 'rgba(200, 200, 200, 0.2)',
+                            showInLegend: false
+                        },
 
                         {
                             name: 'Average Mobile Download Speed',
+                            keys: ['name', 'value'],
                             data: inSeries,
-                            joinBy: null,
+                            joinBy: 'name',
                             borderColor: '#666',
-                            tooltip: {
-                              //  pointFormat: '<b>{point.name}</b><br>Lat: {point.lat}<br>Lon: {point.lon}<br>Value: {point.value} Mbps'
-                                pointFormat: '<b>{point.name}</b><br>Value: {point.value} Mbps'
+                            dataLabels: {
+                                enabled: true,
+                                format: '{point.properties.postal}'
                             }
+                           
                         }
                     ]
                 });
             })();
         }
 
-     //   function updateChart(region) {
-            // Implement logic to update the chart based on the selected region
-            // You can filter the records based on the 'region' attribute and then update the chart accordingly.
-            // Example: filteredRecords = records.filter(record => record.region === region);
-            // Update the chart with the filtered records.
-      //  }
     </script>
 </body>
 
