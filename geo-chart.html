@@ -43,7 +43,7 @@
             margin: 0 auto;
         }
 
-        #container {
+        #container-geo {
             height: 600px;
         }
     </style>
@@ -61,7 +61,7 @@
             EU Region
         </button> -->
     </div>
-    <div id="container"></div>
+    <div id="container-geo"></div>
 
     <script type="text/javascript">
         const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRa0aUEhPBQVe8h4wXb5RYhFVVmh8jv0U_6S902cROkrU8I9TuiSxRdxsi1_zTbBMXs4wKZnj4mIPt4/pub?output=csv';
@@ -146,7 +146,7 @@
                     1
                 );
 
-                Highcharts.mapChart('container', {
+                Highcharts.mapChart('container-geo', {
                     chart: {
                         map: eu
                     },
@@ -162,20 +162,7 @@
                             verticalAlign: 'bottom'
                         }
                     },
-                    // plotOptions: {
-                    //     map: {
-                    //         showInLegend: false,
-                    //         dataLabels: {
-                    //             enabled: true,
-                    //             format: '{point.lat}, {point.lon}', // Format for displaying lat and lon
-                    //             style: {
-                    //                 color: 'black', // Color of the data labels
-                    //                 textOutline: '0px contrast', // Remove text outline
-                    //             },
-                    //         },
-
-                    //     }
-                    // },
+                   
                     colorAxis: {
                         min: 0,
                         max: 120,
