@@ -120,6 +120,7 @@
             if (filter == '') {
                 const newData = records;
                 const series = newData.map(x => { return { y: x.value, color: x.color } });
+                const categories = newData.map(x => x.name);
                 chart.series[0].setData(series);
                 const newspline = newData.map(x => x.average);
                 chart.series[1].setData(newspline);
@@ -127,6 +128,9 @@
                 chart.series[1].update({
                     name: "All Regions"
                 })
+                chart.xAxis[0].update({
+                     categories: categories
+                });
                 const clickedButton = document.getElementById('all-regions');
                 if (clickedButton) {
                     clickedButton.classList.add('active');
