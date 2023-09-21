@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+
+<head>
+    <script src="https://code.highcharts.com/10/highcharts.js"></script>
+
+    <head>
+        <style>
+            .buttons {
+                min-width: 310px;
+                text-align: center;
+                margin: 1rem 0;
+                font-size: 0;
+                padding-top: 20px;
+            }
+
+            .buttons button {
+                cursor: pointer;
+                border: 1px solid #0051b4;
+                border-right-width: 0;
+                font-size: 1rem;
+                padding: 0.5rem;
+                transition-duration: 0.3s;
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .buttons button.active {
+                background-color: #0051b4;
+                color: white;
+            }
+
+            .buttons button:first-child {
+                border-top-left-radius: 0.3em;
+                border-bottom-left-radius: 0.3em;
+            }
+        </style>
+    </head>
+</head>
+
+<body>
+
+    <div class='buttons'>
+        <button id='all-regions-road' class="active" onclick="updateRoadChart('')">
+            All Regions
+        </button>
+        <button id='ECA-btn' onclick="updateRoadChart('ECA')">
+            ECA Region
+        </button>
+        <button id='EU-btn' onclick="updateRoadChart('EU')">
+            EU Region
+        </button>
+    </div>
+
+    <div id="road_quality" style="width:100%; height:400px;"></div>
+
+    <script type="text/javascript">     
+        const googleSheetRoadQualityUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNVl81RcMWzR1opJPU_IDytR61QxDlTYA19aAV7pbUDhAVLuhyCKKifDUnHnGQjvLqGOk4yW2tQ8Fs/pub?gid=0&single=true&output=csv'; // Replace with your Google Sheet URL
+
+        let roadRecords = [];
+        const roadGColors = {
+            ECA: "#4472c4",
+            EU: "#00a3bf"
+        }
+        let roadChart;
+        fetch(googleSheetRoadQualityUrl)
+            .then(response => response.text())
+            .then(data => {
+                // Process the CSV data
+                data = data.replace(/, Mbps/g, " Mbps");
+                const rows = data.split('\n');
+                const header = rows[0].split(',').map(x => x.trim());
+
+                const result = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const values = rows[i].split(',');
+                    const rowData = {};
+                    for (let j = 0; j < header.length; j++) {
+                        let value = values[j];
+
+                        // Handle single quotes within double-quoted fields
+                        if (value.indexOf('"') != -1) {
+                            value = value.replace(/"/g, "");
+                        }
+
+                        rowData[header[j]] = value;
+
+                    }
+                    result.push(rowData);
+                }
+
+                roadRecords = result.map(row => {
+                    return {
+                        name: row.country,
+                        value: parseFloat(row.value),
+                        average: parseFloat(row.average),
+                        region: row.region,
+                        color: roadGColors[row.region]
+                    }
+                });
+                roadRecords.sort((a, b) => a.value - b.value);
+                drawRoadChart(roadRecords);
+            })
+            .catch(error => {
+                console.error('Error reading data from Google Sheet:', error);
+            });
+
+        function updateRoadChart(filter) {
+            const buttons = document.querySelectorAll('.buttons button');
+            buttons.forEach(button => {
+                button.classList.remove('active');
+            });
+            // Add the 'active' class to the clicked button
+            const clickedButton = document.getElementById(filter);
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+            if (filter == '') {
+                const newData = roadRecords;
+                const series = newData.map(x => { return { y: x.value, color: x.color } });
+                const categories = newData.map(x => x.name);
+                roadChart.series[0].setData(series);
+                const newspline = newData.map(x => x.average);
+                roadChart.series[1].setData(newspline);
+
+                roadChart.series[1].update({
+                    name: "All Regions"
+                })
+                roadChart.xAxis[0].update({
+                    categories: categories
+                });
+                const clickedButton = document.getElementById('all-regions-road');
+                if (clickedButton) {
+                    clickedButton.classList.add('active');
+                }
+                roadChart.redraw();
+                return;
+            }
+            const newData = roadRecords.filter(x => x.region == filter);
+            const series = newData.map(x => { return { y: x.value, color: x.color } });
+            const newCategories = newData.map(x => x.name);
+            // Update the categories and redraw the chart
+            roadChart.xAxis[0].update({
+                categories: newCategories
+            });
+            roadChart.series[0].setData(series);
+            const newspline = newData.map(x => x.average);
+            roadChart.series[1].setData(newspline);
+
+            const title = filter == 'ECA' ? "ECA Regions" : "EU Regions";
+            roadChart.series[1].update({
+                name: title
+            })
+
+        }
+        function drawRoadChart(data) {
+            const categories = data.map(x => x.name);
+            const series = data.map(x => { return { y: x.value, color: x.color } });
+            const spline = data.map(x => x.average);
+            roadChart = Highcharts.chart('road_quality', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Country Scores'
+                },
+                xAxis: {
+                    title: {
+                        text: 'Countries'
+                    },
+                    categories: categories
+                },
+                yAxis: {
+                    title: {
+                        text: 'Score'
+                    },
+                    min: 0,
+                    max: 125
+                },
+                credits: {
+                    enabled: false
+                },
+                plotOptions: {
+                    column: {
+                        dataLabels: {
+                            enabled: false,
+                            format: '{y}'
+                        },
+                        colorByPoint: true
+                    }
+                },
+                series: [
+                    {
+                        name: 'Score',
+                        data: series,
+                        showInLegend: false
+                    },
+                    {
+                        name: 'EU Average',
+                        type: 'spline',
+                        color: 'red',
+                        data: spline,
+                        marker: {
+                            enabled: false
+                        }
+                    }
+                ]
+            });
+        }     
+    </script>
+</body>
+
+</html>
