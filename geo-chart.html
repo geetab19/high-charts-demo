@@ -129,16 +129,12 @@
         function drawEUChart(inputData) {
             const inSeries = inputData.map(x => {
                 return { name: x.name, lat: x.lat, lon: x.lon, value: x.value }
-               //return {  value: x.value }
             });
             console.dir(inSeries);
             (async () => {
-                const world = await fetch(
-                    'https://code.highcharts.com/mapdata/custom/world.topo.json'
-                ).then(response => response.json());
-
+              
                 const eu = await fetch(
-                    'https://code.highcharts.com/mapdata/custom/european-union.topo.json'
+                    'https://code.highcharts.com/mapdata/custom/europe.topo.json'
                 ).then(response => response.json());
 
                 eu.objects.default.geometries.splice(
@@ -151,7 +147,7 @@
                         map: eu
                     },
                     title: {
-                        text: 'European Union'
+                        text: 'Europe'
                     },
                     subtitle: {
                         text: ''
@@ -174,16 +170,6 @@
                        
                     },
                     series: [
-                        {
-                            name: 'Basemap',
-                            mapData: eu,
-                            accessibility: {
-                                exposeAsGroupOnly: true
-                            },
-                            borderColor: '#606060',
-                            nullColor: 'rgba(200, 200, 200, 0.2)',
-                            showInLegend: false
-                        },
 
                         {
                             name: 'Average Mobile Download Speed',
