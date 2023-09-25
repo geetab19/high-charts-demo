@@ -39,7 +39,7 @@
 
 <body>
 
-    <div class='buttons'>
+    <div class='road-buttons buttons'>
         <button id='all-regions-road' class="active" onclick="updateRoadChart('')">
             All Regions
         </button>
@@ -105,12 +105,12 @@
             });
 
         function updateRoadChart(filter) {
-            const buttons = document.querySelectorAll('.buttons button');
+            const buttons = document.querySelectorAll('.road-buttons.buttons button');
             buttons.forEach(button => {
                 button.classList.remove('active');
             });
             // Add the 'active' class to the clicked button
-            const clickedButton = document.getElementById(filter);
+            const clickedButton = document.getElementById(filter + '-btn');
             if (clickedButton) {
                 clickedButton.classList.add('active');
             }
