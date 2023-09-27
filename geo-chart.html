@@ -136,7 +136,8 @@
             (async () => {
 
                 const eu = await fetch(
-                    'https://code.highcharts.com/mapdata/custom/europe.topo.json'
+                    'https://code.highcharts.com/mapdata/custom/world.topo.json'
+                    // 'https://code.highcharts.com/mapdata/custom/europe.topo.json'
                 ).then(response => response.json());
 
                 eu.objects.default.geometries.splice(
