@@ -38,13 +38,14 @@
         }
 
         .highcharts-figure {
-            min-width: 300px;
-            max-width: 600px;
+            min-width: 900px;
+            max-width:100%;
             margin: 0 auto;
         }
 
         #container-geo {
-            height: 600px;
+            max-width:100%;
+            height: 900px;
             border: 1px solid #000;
             /* Add a 1px solid black border around the map */
         }
@@ -136,8 +137,7 @@
             (async () => {
 
                 const eu = await fetch(
-                    'https://code.highcharts.com/mapdata/custom/world.topo.json'
-                    // 'https://code.highcharts.com/mapdata/custom/europe.topo.json'
+                    'https://code.highcharts.com/mapdata/custom/europe.topo.json'
                 ).then(response => response.json());
 
                 eu.objects.default.geometries.splice(
