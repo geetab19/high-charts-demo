@@ -99,10 +99,12 @@
                         value: parseFloat(row.value),
                         average: parseFloat(row.average),
                         region: row.region,
-                        color: colors[row.region]
+						opacity: row.region== "EU"? 0.2 : 1
+                        // color: colors[row.region]
                     }
                 });
                 records.sort((a, b) => a.value - b.value);
+				console.log(records);
                 drawChart(records);
             })
             .catch(error => {
@@ -159,7 +161,7 @@
         }
         function drawChart(data) {
             const categories = data.map(x => x.name);
-            const series = data.map(x => { return { y: x.value, color: x.color } });
+            const series = data.map(x => { return { y: x.value, color: x.color, opacity: x.opacity } });
             const spline = data.map(x => x.average);
             chart = Highcharts.chart('container', {
                 chart: {
