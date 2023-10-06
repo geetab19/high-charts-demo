@@ -63,8 +63,8 @@
         
         let records = [];
         const colors = {
-            ECA: "green",
-            EU: "blue"
+            //ECA: "green",
+            EU: "rgba(89, 171, 227, .4)"
         }
         let chart;
         fetch(googleSheetUrl)
@@ -178,7 +178,7 @@
                     title: {
                         text: 'Score'
                     },
-                    min: -100,
+                    min: -125,
                     max: 125
                 },
                 credits: {
