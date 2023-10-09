@@ -43,31 +43,28 @@
     </script>
 
     <div class='buttons'>
-        <button id='all-regions' class="active" onclick="updateChart('')">
+        <button id='all-regions' class="active" onclick="updateInfraChart('')">
             All Regions
         </button>
-        <button id='ECA' onclick="updateChart('ECA')">
+        <button id='ECA' onclick="updateInfraChart('ECA')">
             ECA Region
         </button>
-        <button id='EU' onclick="updateChart('EU')">
+        <button id='EU' onclick="updateInfraChart('EU')">
             EU Region
         </button>
     </div>
-    <div id="container" style="width:100%; height:400px;">
+    <div id="infra-container" style="width:100%; height:400px;">
     </div>
     <script type="text/javascript">
-        // const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/1BUOzNU0sv5CPWz75oux8S7l7UOcJBQzcfxDCPXs_cCs/pub?gid=0&single=true&output=csv'; // Replace with your Google Sheet URL
-        // const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRa0aUEhPBQVe8h4wXb5RYhFVVmh8jv0U_6S902cROkrU8I9TuiSxRdxsi1_zTbBMXs4wKZnj4mIPt4/pub?output=csv'; // Replace with your Google Sheet URL
+       
+        const infrastructureDataSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSulQJzKOwwaTVG9zydQo3ix-_bPbmzNHmo8j6gUXdGEG3Xqz8-jMKKRyBNXeKLmHrDwxf8fYsph_x1/pub?output=csv';
 
-        const googleSheetUrl='https://docs.google.com/spreadsheets/d/e/2PACX-1vSulQJzKOwwaTVG9zydQo3ix-_bPbmzNHmo8j6gUXdGEG3Xqz8-jMKKRyBNXeKLmHrDwxf8fYsph_x1/pub?output=csv';
-        
-        let records = [];
+        let infraRecords = [];
         const colors = {
-            //ECA: "green",
             EU: "rgba(89, 171, 227, .4)"
         }
         let chart;
-        fetch(googleSheetUrl)
+        fetch(infrastructureDataSheetUrl)
             .then(response => response.text())
             .then(data => {
                 // Process the CSV data
@@ -93,25 +90,25 @@
                     result.push(rowData);
                 }
 
-                records = result.map(row => {
+                infraRecords = result.map(row => {
                     return {
                         name: row.country,
                         value: parseFloat(row.value),
                         average: parseFloat(row.average),
                         region: row.region,
-						opacity: row.region== "EU"? 0.2 : 1
+                        opacity: row.region == "EU" ? 0.2 : 1
                         // color: colors[row.region]
                     }
                 });
-                records.sort((a, b) => a.value - b.value);
-				console.log(records);
-                drawChart(records);
+                infraRecords.sort((a, b) => a.value - b.value);
+                console.log(infraRecords);
+                drawChart(infraRecords);
             })
             .catch(error => {
                 console.error('Error reading data from Google Sheet:', error);
             });
 
-        function updateChart(filter) {
+        function updateInfraChart(filter) {
             const buttons = document.querySelectorAll('.buttons button');
             buttons.forEach(button => {
                 button.classList.remove('active');
@@ -122,7 +119,7 @@
                 clickedButton.classList.add('active');
             }
             if (filter == '') {
-                const newData = records;
+                const newData = infraRecords;
                 const series = newData.map(x => { return { y: x.value, color: x.color } });
                 const categories = newData.map(x => x.name);
                 chart.series[0].setData(series);
@@ -133,7 +130,7 @@
                     name: "All Regions"
                 })
                 chart.xAxis[0].update({
-                     categories: categories
+                    categories: categories
                 });
                 const clickedButton = document.getElementById('all-regions');
                 if (clickedButton) {
@@ -142,7 +139,7 @@
                 chart.redraw();
                 return;
             }
-            const newData = records.filter(x => x.region == filter);
+            const newData = infraRecords.filter(x => x.region == filter);
             const series = newData.map(x => { return { y: x.value, color: x.color } });
             const newCategories = newData.map(x => x.name);
             // Update the categories and redraw the chart
@@ -163,9 +160,12 @@
             const categories = data.map(x => x.name);
             const series = data.map(x => { return { y: x.value, color: x.color, opacity: x.opacity } });
             const spline = data.map(x => x.average);
-            chart = Highcharts.chart('container', {
+            chart = Highcharts.chart('infra-container', {
                 chart: {
-                    type: 'column'
+                    type: 'column',
+                    height: 700,
+                    marginBottom: 390, 
+                   
                 },
                 title: {
                     text: 'Country Scores'
@@ -174,14 +174,18 @@
                     title: {
                         text: 'Countries'
                     },
-                    categories: categories
+                    categories: categories,
+                    labels: {
+                        enabled: true, // Set this property to true to show x-axis labels
+                        rotation: -25
+                    }
                 },
                 yAxis: {
                     title: {
                         text: 'Score'
                     },
-                    min: -125,
-                    max: 125
+                    min: -110,
+                    max: 130
                 },
                 credits: {
                     enabled: false
