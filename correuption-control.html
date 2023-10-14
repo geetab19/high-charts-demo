@@ -117,7 +117,7 @@
             if (filter == '') {
                 const newData = corruptionRecords;
                 if (newData.length != 0) {
-                    const series = newData.map(x => { return { y: x.value, color: x.color } });
+                    const series = newData.map(x => { return { y: x.value, opacity: x.opacity } });
                     const categories = newData.map(x => x.name);
                     chart.series[0].setData(series);
                     const newspline = newData.map(x => x.average);
@@ -139,7 +139,7 @@
                 return;
             }
             const newData = corruptionRecords.filter(x => x.region == filter);
-            const series = newData.map(x => { return { y: x.value, color: x.color } });
+            const series = newData.map(x => { return { y: x.value, opacity: x.opacity } });
             const newCategories = newData.map(x => x.name);
             // Update the categories and redraw the chart
             chart.xAxis[0].update({
@@ -159,7 +159,7 @@
         
         function drawChart(data) {
             const categories = data.map(x => x.name);
-            const series = data.map(x => { return { y: x.value, color: x.color, opacity: x.opacity } });
+            const series = data.map(x => { return { y: x.value, opacity: x.opacity } });
             const spline = data.map(x => x.average);
             chart = Highcharts.chart('corruption-container', {
                 chart: {
