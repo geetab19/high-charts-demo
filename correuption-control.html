@@ -38,14 +38,14 @@
 </head>
 
 <body>
-    <div class='buttons'>
-        <button id='all-regions' class="active" onclick="updatecorruptionChart('')">
+    <div class='buttons' id="corruption">
+        <button data-id="all"  class="active" onclick="updatecorruptionChart('')">
             All Regions
         </button>
-        <button id='ECA' onclick="updatecorruptionChart('ECA')">
+        <button data-id='ECA' onclick="updatecorruptionChart('ECA')">
             ECA Region
         </button>
-        <button id='EU' onclick="updatecorruptionChart('EU')">
+        <button data-id='EU' onclick="updatecorruptionChart('EU')">
             EU Region
         </button>
     </div>
@@ -59,7 +59,7 @@
         const corruptionColors = {
             EU: "rgba(89, 171, 227, .4)"
         }
-        let chart;
+        let corruptionChart;
         fetch(corruptionDataSheetUrl)
             .then(response => response.text())
             .then(data => {
@@ -98,19 +98,19 @@
                 });
                 corruptionRecords.sort((a, b) => a.value - b.value);
                 console.log(corruptionRecords);
-                drawChart(corruptionRecords);
+                drawCurruptionChart(corruptionRecords);
             })
             .catch(error => {
                 console.error('Error reading data from Google Sheet:', error);
             });
 
         function updatecorruptionChart(filter) {
-            const buttons = document.querySelectorAll('.buttons button');
+            const buttons = document.querySelectorAll('#corruption.buttons button');
             buttons.forEach(button => {
                 button.classList.remove('active');
             });
             // Add the 'active' class to the clicked button
-            const clickedButton = document.getElementById(filter);
+            const clickedButton = document.querySelector('#corruption button[data-id="' + filter + '"]');
             if (clickedButton) {
                 clickedButton.classList.add('active');
             }
@@ -119,49 +119,49 @@
                 if (newData.length != 0) {
                     const series = newData.map(x => { return { y: x.value, opacity: x.opacity } });
                     const categories = newData.map(x => x.name);
-                    chart.series[0].setData(series);
+                    corruptionChart.series[0].setData(series);
                     const newspline = newData.map(x => x.average);
-                    chart.series[1].setData(newspline);
-                    chart.series[1].update({
-                        name: "All Regions"
-                    })
-                    chart.xAxis[0].update({
+                    corruptionChart.series[1].setData(newspline);
+                    // corruptionChart.series[1].update({
+                    //     name: "All Regions"
+                    // })
+                    corruptionChart.xAxis[0].update({
                         categories: categories
                     });
                 }
 
 
-                const clickedButton = document.getElementById('all-regions');
+                const clickedButton =  document.querySelector('#corruption button[data-id="all"]');
                 if (clickedButton) {
                     clickedButton.classList.add('active');
                 }
-                chart.redraw();
+                corruptionChart.redraw();
                 return;
             }
             const newData = corruptionRecords.filter(x => x.region == filter);
             const series = newData.map(x => { return { y: x.value, opacity: x.opacity } });
             const newCategories = newData.map(x => x.name);
             // Update the categories and redraw the chart
-            chart.xAxis[0].update({
+            corruptionChart.xAxis[0].update({
                 categories: newCategories
             });
-            chart.series[0].setData(series);
+            corruptionChart.series[0].setData(series);
             const newspline = newData.map(x => x.average);
-            chart.series[1].setData(newspline);
+            corruptionChart.series[1].setData(newspline);
 
-            const title = filter == 'ECA' ? "ECA Regions" : "EU Regions";
-            chart.series[1].update({
-                name: title
-            })
+           // const title = filter == 'ECA' ? "ECA Regions" : "EU Regions";
+            // corruptionChart.series[1].update({
+            //     name: title
+            // })
 
         }
 
         
-        function drawChart(data) {
+        function drawCurruptionChart(data) {
             const categories = data.map(x => x.name);
             const series = data.map(x => { return { y: x.value, opacity: x.opacity } });
             const spline = data.map(x => x.average);
-            chart = Highcharts.chart('corruption-container', {
+            corruptionChart = Highcharts.chart('corruption-container', {
                 chart: {
                     type: 'column',
                     height: 700,

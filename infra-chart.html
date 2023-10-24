@@ -39,32 +39,33 @@
 
 <body>
     <script>
-
+    
     </script>
 
-    <div class='buttons'>
-        <button id='all-regions' class="active" onclick="updateInfraChart('')">
-            All Regions
+    <div class='buttons' id="infra">
+        <button class="active"  data-id="all" onclick="updateInfraChart('')">
+            All
         </button>
-        <button id='ECA' onclick="updateInfraChart('ECA')">
-            ECA Region
+        <button data-id="ECA" onclick="updateInfraChart('ECA')">
+            ECA
         </button>
-        <button id='EU' onclick="updateInfraChart('EU')">
-            EU Region
+        <button  data-id="EU" onclick="updateInfraChart('EU')">
+            EU 27
         </button>
     </div>
-    <div id="infra-container" style="width:100%; height:400px;">
-    </div>
+
+    <div id="container-infrastructure-overview" style="width:100%; height:400px;"></div>
+
     <script type="text/javascript">
-       
-        const infrastructureDataSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSulQJzKOwwaTVG9zydQo3ix-_bPbmzNHmo8j6gUXdGEG3Xqz8-jMKKRyBNXeKLmHrDwxf8fYsph_x1/pub?output=csv';
+        const infraGoogleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRa0aUEhPBQVe8h4wXb5RYhFVVmh8jv0U_6S902cROkrU8I9TuiSxRdxsi1_zTbBMXs4wKZnj4mIPt4/pub?output=csv'; // Replace with your Google Sheet URL
 
         let infraRecords = [];
-        const colors = {
-            EU: "rgba(89, 171, 227, .4)"
+        const infraColors = {
+            ECA: "#4472c4",
+            EU: "#00a3bf"
         }
-        let chart;
-        fetch(infrastructureDataSheetUrl)
+        let infraChart;
+        fetch(infraGoogleSheetUrl)
             .then(response => response.text())
             .then(data => {
                 // Process the CSV data
@@ -96,12 +97,10 @@
                         value: parseFloat(row.value),
                         average: parseFloat(row.average),
                         region: row.region,
-                        opacity: row.region == "EU" ? 0.2 : 1
-                        // color: colors[row.region]
+                        color: infraColors[row.region]
                     }
                 });
                 infraRecords.sort((a, b) => a.value - b.value);
-                console.log(infraRecords);
                 drawChart(infraRecords);
             })
             .catch(error => {
@@ -109,12 +108,12 @@
             });
 
         function updateInfraChart(filter) {
-            const buttons = document.querySelectorAll('.buttons button');
+            const buttons = document.querySelectorAll('#infra.buttons button');
             buttons.forEach(button => {
                 button.classList.remove('active');
             });
             // Add the 'active' class to the clicked button
-            const clickedButton = document.getElementById(filter);
+            const clickedButton = document.querySelector('#infra button[data-id="' + filter + '"]');
             if (clickedButton) {
                 clickedButton.classList.add('active');
             }
@@ -122,70 +121,63 @@
                 const newData = infraRecords;
                 const series = newData.map(x => { return { y: x.value, color: x.color } });
                 const categories = newData.map(x => x.name);
-                chart.series[0].setData(series);
+                infraChart.series[0].setData(series);
                 const newspline = newData.map(x => x.average);
-                chart.series[1].setData(newspline);
+                infraChart.series[1].setData(newspline);
 
-                chart.series[1].update({
-                    name: "All Regions"
+                infraChart.series[1].update({
+                    name: "EU Average"
                 })
-                chart.xAxis[0].update({
+                infraChart.xAxis[0].update({
                     categories: categories
                 });
-                const clickedButton = document.getElementById('all-regions');
+                const clickedButton = document.querySelector('#infra button[data-id="all"]');
                 if (clickedButton) {
                     clickedButton.classList.add('active');
                 }
-                chart.redraw();
+                infraChart.redraw();
                 return;
             }
             const newData = infraRecords.filter(x => x.region == filter);
             const series = newData.map(x => { return { y: x.value, color: x.color } });
             const newCategories = newData.map(x => x.name);
             // Update the categories and redraw the chart
-            chart.xAxis[0].update({
+            infraChart.xAxis[0].update({
                 categories: newCategories
             });
-            chart.series[0].setData(series);
+            infraChart.series[0].setData(series);
             const newspline = newData.map(x => x.average);
-            chart.series[1].setData(newspline);
+            infraChart.series[1].setData(newspline);
 
             const title = filter == 'ECA' ? "ECA Regions" : "EU Regions";
-            chart.series[1].update({
+            infraChart.series[1].update({
                 name: title
             })
 
         }
         function drawChart(data) {
             const categories = data.map(x => x.name);
-            const series = data.map(x => { return { y: x.value, color: x.color, opacity: x.opacity } });
+            const series = data.map(x => { return { y: x.value, color: x.color } });
             const spline = data.map(x => x.average);
-            chart = Highcharts.chart('infra-container', {
-                chart: {
-                    type: 'column',
-                    height: 700,
-                    marginBottom: 390, 
-                   
+            infraChart = Highcharts.chart('container-infrastructure-overview', {
+                infraChart: {
+                    type: 'column'
                 },
                 title: {
-                    text: 'Country Scores'
+                    text: 'Infrastructure gap with EU 27 Ave'
                 },
                 xAxis: {
                     title: {
                         text: 'Countries'
                     },
-                    categories: categories,
-                    labels: {
-                        enabled: true, // Set this property to true to show x-axis labels
-                        rotation: -25
-                    }
+                    categories: categories
                 },
                 yAxis: {
                     title: {
-                        text: 'Score'
+                        text: 'Infrastructure gap with EU 27 Ave'
                     },
-                    min: -110,
-                    max: 130
+                    min: 0,
+                    max: 125
                 },
                 credits: {
                     enabled: false
@@ -206,7 +198,7 @@
                         showInLegend: false
                     },
                     {
-                        name: 'All Regions',
+                        name: 'EU 27 Average',
                         type: 'spline',
                         color: 'red',
                         data: spline,
