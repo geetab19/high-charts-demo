@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capstock Data Chart</title>
+    <!-- Include Highcharts library -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+</head>
+
+<body>
+
+    <div id="govtStockchartContainer" style="height: 800px;"></div>
+
+    <script>
+        const govtCapitalStockGoogleSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQuev7YejAvDefPInb_rmRQ-02Sx7GiEqEmlG6mMyXtvMTedOIXKzbAfC4Fa9ID4gGmJ3MvpedobTE6/pub?output=csv'
+        let govtCapitalStockRecords = {};
+
+        // Function to group data by a specific property
+        function groupBy(data, property) {
+            return data.reduce((result, current) => {
+                const key = current[property];
+                if (!result[key]) {
+                    result[key] = [];
+                }
+                result[key].push(current);
+                return result;
+            }, {});
+        }
+        fetch(govtCapitalStockGoogleSheet)
+            .then(response => response.text())
+            .then(data => {
+                // console.dir(data);
+                const rows = data.split('\n');
+                const header = rows[0].split(',').map(x => x.trim());
+
+                const result = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const values = rows[i].split(',');
+                    const rowData = {};
+                    for (let j = 0; j < header.length; j++) {
+                        let value = values[j];
+
+                        // Handle single quotes within double-quoted fields
+                        if (value.indexOf('"') != -1) {
+                            value = value.replace(/"/g, "");
+                        }
+
+                        rowData[header[j]] = value;
+
+                    }
+                    result.push(rowData);
+                }
+                //console.dir(result);
+                const newResult = groupBy(result, 'country');
+                // console.dir(newResult);
+                const keys = Object.keys(newResult);
+                keys.forEach(country => {
+                    const arr = newResult[country];
+                    var yearDict = {};
+                    var euAvg = {};
+                    for (var year = 2000; year <= 2019; year++) {
+
+                        // Find the corresponding data for the year
+                        var dataForYear = arr.find(data => data.year === year.toString());
+
+
+                        // If data exists, use the value; otherwise, set it to null
+                        yearDict[year.toString()] = dataForYear ? parseInt(dataForYear.value) : null;
+
+                    }
+
+                    newResult[country] = yearDict;
+
+                });
+
+                const chartKeys = Object.keys(newResult);
+                const govtChartData = chartKeys.map(k => {
+                    return ({
+                        label: k,
+                        xAxis: Object.keys(newResult[k]),
+                        yAxis: Object.keys(newResult[k]).map(key => newResult[k][key])
+                    })
+                });
+
+                console.dir(govtChartData);
+                drawGovtStockChart(govtChartData);
+            });
+
+        function drawGovtStockChart(govtChartData) {
+            Highcharts.chart('govtStockchartContainer', {
+
+                title: {
+                    text: 'U.S Solar Employment Growth',
+                    align: 'left'
+                },
+
+                subtitle: {
+                    text: 'By Job Category. Source: <a href="https://irecusa.org/programs/solar-jobs-census/" target="_blank">IREC</a>.',
+                    align: 'left'
+                },
+
+                yAxis: {
+                    title: {
+                        text: 'Number of Employees'
+                    }
+                },
+
+                xAxis: {
+                    accessibility: {
+                        rangeDescription: 'Range: 2000 to 2019'
+                    }
+                },
+
+                legend: {
+                    layout: 'vertical',
+                    align: 'right',
+                    verticalAlign: 'middle'
+                },
+
+                plotOptions: {
+                    series: {
+                        label: {
+                            connectorAllowed: false
+                        },
+                        pointStart: 2000
+                    }
+                },
+                series: govtChartData.map(item => {
+                    return({
+                        name: item.label,
+                        data: item.yAxis
+                    })
+                }),
+
+                // series: [{
+                //     name: 'Installation & Developers',
+                //     data: [43934, 48656, 65165, 81827, 112143, 142383,
+                //         171533, 165174, 155157, 161454, 154610]
+                // }, {
+                //     name: 'Manufacturing',
+                //     data: [24916, 37941, 29742, 29851, 32490, 30282,
+                //         38121, 36885, 33726, 34243, 31050]
+                // }, {
+                //     name: 'Sales & Distribution',
+                //     data: [11744, 30000, 16005, 19771, 20185, 24377,
+                //         32147, 30912, 29243, 29213, 25663]
+                // }, {
+                //     name: 'Operations & Maintenance',
+                //     data: [null, null, null, null, null, null, null,
+                //         null, 11164, 11218, 10077]
+                // }, {
+                //     name: 'Other',
+                //     data: [21908, 5548, 8105, 11248, 8989, 11816, 18274,
+                //         17300, 13053, 11906, 10073]
+                // }],
+
+                responsive: {
+                    rules: [{
+                        condition: {
+                            maxWidth: 500
+                        },
+                        chartOptions: {
+                            legend: {
+                                layout: 'horizontal',
+                                align: 'center',
+                                verticalAlign: 'bottom'
+                            }
+                        }
+                    }]
+                }
+
+            });
+        }
+
+    </script>
+
+</body>
+
+</html>
